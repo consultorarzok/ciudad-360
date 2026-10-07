@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ciudad 360°</title>
 <meta name="description" content="Ciudad 360°: un espacio para escuchar, conectar y transformar ideas en acciones para la ciudad.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ciudad 360°">
+<meta property="og:description" content="Un espacio para escuchar, conectar y transformar ideas en acciones para la ciudad.">
+<meta property="og:url" content="https://consultorarzok.github.io/ciudad-360/">
+<meta property="og:image" content="https://consultorarzok.github.io/ciudad-360/assets/img/social-share.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -292,7 +298,18 @@
   @media (min-width:900px){ .wheel-note{display:none;} }
 
   /* ---------- banco de ideas ---------- */
-  .panel-tint{background:var(--tint); border-top:1px solid var(--tint-line); border-bottom:1px solid var(--tint-line);}
+  .panel-tint{
+    position:relative; overflow:hidden;
+    background:var(--tint); border-top:1px solid var(--tint-line); border-bottom:1px solid var(--tint-line);
+  }
+  .panel-tint::before{
+    content:""; position:absolute; inset:0;
+    background:url("assets/img/banco-ideas-bg.jpg") center/cover no-repeat;
+    opacity:.4;
+    mask-image:radial-gradient(ellipse 58% 72% at center, transparent 30%, black 100%);
+    -webkit-mask-image:radial-gradient(ellipse 58% 72% at center, transparent 30%, black 100%);
+  }
+  .panel-tint > .wrap{position:relative; z-index:1;}
   .panel-center{max-width:620px; margin:0 auto; text-align:center;}
   .panel-center h2{margin-bottom:14px;}
   .panel-center .lede{margin:0 auto 26px; }
@@ -366,7 +383,16 @@
   .social-chip.live{color:var(--ink); border-color:var(--yellow); background:var(--tint);}
 
   /* ---------- cierre ---------- */
-  .cierre{background:var(--ink); color:var(--paper); text-align:center;}
+  .cierre{
+    position:relative; overflow:hidden;
+    background:var(--ink) center/cover no-repeat url("assets/img/cierre-bg.jpg");
+    color:var(--paper); text-align:center;
+  }
+  .cierre::before{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,9,5,.5), rgba(10,9,5,.82));
+  }
+  .cierre > .wrap{position:relative; z-index:1;}
   .cierre .logo-mark{color:var(--paper); font-size:1.4rem;}
   .cierre h2{color:var(--paper); font-size:clamp(1.8rem,4vw,2.6rem); max-width:720px; margin:0 auto 10px;}
   .cierre .sub{font-weight:600; font-size:1.1rem; margin-bottom:34px;}
