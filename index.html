@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ciudad 360°</title>
+<meta name="description" content="Ciudad 360°: un espacio para escuchar, conectar y transformar ideas en acciones para la ciudad.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --yellow:#FFEB05;
+    --yellow-ink:#1A1A15;
+    --ink:#1A1A15;
+    --ink-soft:#5B5848;
+    --paper:#FFFFFF;
+    --surface:#F7F5EA;
+    --line:#E8E4D4;
+    --tint:#FFF9DC;
+    --tint-line:#F0E6A8;
+    --radius-card:18px;
+    --maxw:1120px;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#F5F1E0;
+      --ink-soft:#B8B39A;
+      --paper:#141309;
+      --surface:#1D1B10;
+      --line:#322E1C;
+      --tint:#2B2708;
+      --tint-line:#473F14;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#F5F1E0;
+    --ink-soft:#B8B39A;
+    --paper:#141309;
+    --surface:#1D1B10;
+    --line:#322E1C;
+    --tint:#2B2708;
+    --tint-line:#473F14;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{
+    font-family:'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+    line-height:1.08;
+  }
+  p{margin:0;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit;}
+  ul,ol{margin:0; padding:0;}
+  img{max-width:100%;}
+  :focus-visible{outline:3px solid var(--yellow); outline-offset:2px; border-radius:6px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+
+  /* ---------- top bar + nav ---------- */
+  .topbar{border-bottom:1px solid var(--line); background:var(--surface);}
+  .topbar-inner{
+    max-width:var(--maxw); margin:0 auto; padding:8px 24px;
+    display:flex; gap:20px; flex-wrap:wrap;
+    font-size:.78rem; color:var(--ink-soft); font-weight:500;
+  }
+  .topbar-inner a{border-bottom:1px solid transparent;}
+  .topbar-inner a:hover{border-color:var(--ink-soft);}
+
+  .nav{
+    position:sticky; top:0; z-index:40;
+    background:var(--paper); border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:var(--maxw); margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .logo-mark{
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:1.15rem;
+    display:inline-flex; align-items:center; gap:.4em; letter-spacing:.01em;
+  }
+  .logo-mark .deg{
+    background:var(--yellow); color:var(--yellow-ink);
+    padding:.1em .38em; border-radius:.3em; font-weight:700;
+  }
+
+  .nav-right{display:flex; align-items:center; gap:10px;}
+  .theme-toggle{
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    border:1.5px solid var(--line); background:var(--surface);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:1.05rem; cursor:pointer; line-height:1;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .theme-toggle:hover{border-color:var(--ink-soft); transform:translateY(-1px);}
+  .theme-toggle .icon{display:none;}
+  .theme-toggle .icon.moon{display:inline;}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .theme-toggle .icon.sun{display:inline;}
+    :root:not([data-theme="light"]) .theme-toggle .icon.moon{display:none;}
+  }
+  :root[data-theme="dark"] .theme-toggle .icon.sun{display:inline;}
+  :root[data-theme="dark"] .theme-toggle .icon.moon{display:none;}
+  :root[data-theme="light"] .theme-toggle .icon.sun{display:none;}
+  :root[data-theme="light"] .theme-toggle .icon.moon{display:inline;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:.5em;
+    padding:13px 26px; border-radius:999px; font-weight:600; font-size:.95rem;
+    border:2px solid transparent; cursor:pointer; white-space:nowrap;
+    transition:transform .15s ease, filter .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-sm{padding:9px 18px; font-size:.85rem;}
+  .btn-lg{padding:16px 34px; font-size:1.02rem; width:100%;}
+  .btn-primary{background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow);}
+  .btn-primary:hover{filter:brightness(1.05);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+  .btn-on-dark{background:var(--yellow); color:var(--yellow-ink);}
+
+  /* ---------- eyebrow (section bearing marker) ---------- */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:.7em;
+    font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--ink-soft); margin-bottom:18px;
+  }
+  .eyebrow .deg-tag{
+    background:var(--yellow); color:var(--yellow-ink);
+    padding:.25em .55em; border-radius:6px; font-family:'Fredoka',sans-serif; letter-spacing:0;
+  }
+
+  section{padding:88px 0;}
+  .lede{font-size:1.1rem; color:var(--ink-soft); max-width:62ch;}
+  .divider{height:1px; background:var(--line); max-width:var(--maxw); margin:0 auto;}
+
+  /* ---------- hero ---------- */
+  .hero{padding-top:64px;}
+  .hero-grid{display:grid; grid-template-columns:1.2fr 1fr; gap:56px; align-items:center;}
+  @media (max-width:860px){.hero-grid{grid-template-columns:1fr;}}
+  .hero h1{font-size:clamp(2.6rem, 6vw, 4.4rem); margin-bottom:8px;}
+  .hero-tagline{font-size:clamp(1.05rem,2.2vw,1.3rem); font-weight:700; margin:10px 0 18px; max-width:30ch;}
+  .hero-lead{font-weight:600; font-size:1.05rem; margin-bottom:10px;}
+  .hero p.body{color:var(--ink-soft); margin-bottom:10px; max-width:58ch;}
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:26px;}
+
+  .hero-visual{display:flex; justify-content:center;}
+  .compass{position:relative; width:min(300px,78vw); aspect-ratio:1;}
+  .compass .ticks{
+    position:absolute; inset:0; border-radius:50%;
+    background:repeating-conic-gradient(var(--line) 0deg 1.3deg, transparent 1.3deg 9deg);
+    animation:spin 100s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .compass .hub{
+    position:absolute; inset:16%; border-radius:50%; background:var(--paper);
+    box-shadow:0 0 0 1px var(--line) inset;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  }
+  .compass .hub strong{font-family:'Fredoka',sans-serif; font-size:1.5rem; font-weight:700;}
+  .compass .hub span{font-size:.65rem; color:var(--ink-soft); font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin-top:2px;}
+  .compass .needle{
+    position:absolute; top:7%; left:50%; width:3px; height:16%;
+    background:var(--yellow); border-radius:3px; transform:translateX(-50%);
+  }
+  .compass .labels span{
+    position:absolute; font-size:.68rem; font-weight:700; color:var(--ink-soft);
+  }
+  .compass .labels .n{top:-2px; left:50%; transform:translateX(-50%);}
+  .compass .labels .e{right:-6px; top:50%; transform:translateY(-50%);}
+  .compass .labels .s{bottom:-2px; left:50%; transform:translateX(-50%);}
+  .compass .labels .w{left:-6px; top:50%; transform:translateY(-50%);}
+
+  /* ---------- section heads ---------- */
+  .section-head{max-width:640px; margin-bottom:46px;}
+  .section-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem); margin-bottom:14px;}
+
+  /* ---------- audience grid (que es) ---------- */
+  .audience-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-bottom:28px;
+  }
+  .audience-card{
+    border:1px solid var(--line); border-radius:var(--radius-card); padding:24px;
+    background:var(--surface);
+  }
+  .audience-card h3{font-size:1.05rem; margin-bottom:8px;}
+  .audience-card p{color:var(--ink-soft); font-size:.92rem;}
+  .closing-line{font-weight:600; max-width:60ch;}
+
+  /* ---------- path / timeline (que queremos hacer) ---------- */
+  .path{list-style:none; display:grid; gap:34px; position:relative; max-width:760px;}
+  .path::before{
+    content:""; position:absolute; left:24px; top:10px; bottom:10px; width:2px; background:var(--line);
+  }
+  .path li{display:grid; grid-template-columns:50px 1fr; gap:22px; position:relative;}
+  .path-num{
+    width:50px; height:50px; border-radius:50%; border:2px solid var(--yellow);
+    background:var(--paper); display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka',sans-serif; font-weight:700; font-size:1rem; z-index:1;
+  }
+  .path h3{font-size:1.1rem; margin-bottom:6px;}
+  .path p{color:var(--ink-soft);}
+
+  /* ---------- wheel (ciudad en 360) ---------- */
+  .wheel-ring{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  .wheel-hub, .wheel-guide{display:none;}
+  @media (min-width:900px){
+    .wheel-ring{position:relative; width:640px; height:640px; margin:0 auto; display:block;}
+    .wheel-guide{
+      display:block; position:absolute; inset:9%; border:1px dashed var(--line); border-radius:50%;
+    }
+    .wheel-hub{
+      display:flex; position:absolute; inset:40%; border-radius:50%; background:var(--yellow);
+      align-items:center; justify-content:center; text-align:center; flex-direction:column;
+    }
+    .wheel-hub strong{font-family:'Fredoka',sans-serif; font-weight:700; color:var(--yellow-ink); font-size:1.3rem;}
+    .wheel-hub span{font-size:.62rem; font-weight:700; color:var(--yellow-ink); text-transform:uppercase; letter-spacing:.06em;}
+    .eje{position:absolute; top:50%; left:50%; width:0; height:0; transform:rotate(var(--angle)) translate(0, calc(-1 * var(--radius)));}
+    .eje .card{position:absolute; width:184px; transform:translate(-50%,-50%) rotate(calc(-1 * var(--angle)));}
+  }
+  .eje .card{
+    border:1px solid var(--line); border-radius:14px; padding:16px 18px; background:var(--paper);
+    text-align:left;
+  }
+  .eje .card h3{font-size:.92rem; margin-bottom:5px;}
+  .eje .card p{font-size:.82rem; color:var(--ink-soft);}
+  .wheel-note{text-align:center; color:var(--ink-soft); font-size:.85rem; margin-top:14px;}
+  @media (min-width:900px){ .wheel-note{display:none;} }
+
+  /* ---------- banco de ideas ---------- */
+  .panel-tint{background:var(--tint); border-top:1px solid var(--tint-line); border-bottom:1px solid var(--tint-line);}
+  .panel-center{max-width:620px; margin:0 auto; text-align:center;}
+  .panel-center h2{margin-bottom:14px;}
+  .panel-center .lede{margin:0 auto 26px; }
+
+  /* ---------- qa block ---------- */
+  .qa{border-left:3px solid var(--yellow); padding-left:20px; margin:28px 0;}
+  .qa-q{font-weight:700; font-size:1.05rem; margin-bottom:6px;}
+  .qa-a{color:var(--ink-soft);}
+
+  /* ---------- form ---------- */
+  .form-shell{
+    background:var(--surface); border:1px solid var(--line); border-radius:24px;
+    padding:clamp(24px,5vw,48px); max-width:720px; margin:0 auto;
+  }
+  fieldset{border:none; padding:0; margin:0 0 36px;}
+  fieldset:last-of-type{margin-bottom:0;}
+  legend{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.1rem;
+    padding:0; margin-bottom:16px; color:var(--ink);
+  }
+  .hint{color:var(--ink-soft); font-size:.88rem; margin-bottom:12px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-weight:600; font-size:.9rem; margin-bottom:6px;}
+  .field label .opt{font-weight:400; color:var(--ink-soft); font-size:.82rem;}
+  .field input, .field textarea{
+    width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--paper); color:var(--ink); font-family:inherit; font-size:.95rem;
+    transition:border-color .15s ease;
+  }
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--yellow);}
+  .field textarea{resize:vertical;}
+
+  .pill-group{display:flex; flex-wrap:wrap; gap:9px;}
+  .pill{position:relative;}
+  .pill input{position:absolute; opacity:0; width:1px; height:1px;}
+  .pill span{
+    display:inline-flex; align-items:center; padding:9px 16px; border-radius:999px;
+    border:1.5px solid var(--line); font-size:.86rem; font-weight:500; cursor:pointer;
+    transition:all .15s ease; background:var(--paper);
+  }
+  .pill input:checked + span{background:var(--yellow); border-color:var(--yellow); color:var(--yellow-ink); font-weight:700;}
+  .pill input:focus-visible + span{outline:3px solid var(--yellow); outline-offset:2px;}
+
+  .radio-group{display:flex; flex-direction:column; gap:10px; margin-bottom:20px;}
+  .radio{position:relative; display:flex; align-items:center;}
+  .radio input{position:absolute; opacity:0; width:1px; height:1px;}
+  .radio span{
+    display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px;
+    border:1.5px solid var(--line); font-size:.92rem; cursor:pointer; width:100%;
+    transition:all .15s ease;
+  }
+  .radio span::before{
+    content:""; width:16px; height:16px; border-radius:50%; border:2px solid var(--ink-soft);
+    flex-shrink:0; transition:all .15s ease;
+  }
+  .radio input:checked + span{border-color:var(--yellow); background:var(--tint);}
+  .radio input:checked + span::before{border-color:var(--yellow-ink); background:radial-gradient(var(--yellow-ink) 0 40%, transparent 42%);}
+  .radio input:focus-visible + span{outline:3px solid var(--yellow); outline-offset:2px;}
+
+  .form-status{margin-top:16px; font-size:.9rem; font-weight:600; min-height:1.4em;}
+  .form-status.ok{color:#3f7a3f;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .form-status.ok{color:#8fcf8f;} }
+  :root[data-theme="dark"] .form-status.ok{color:#8fcf8f;}
+
+  /* ---------- socials ---------- */
+  .social-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px;}
+  .social-chip{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:999px;
+    border:1.5px solid var(--line); font-weight:600; font-size:.9rem; color:var(--ink-soft);
+  }
+  .social-chip.live{color:var(--ink); border-color:var(--yellow); background:var(--tint);}
+
+  /* ---------- cierre ---------- */
+  .cierre{background:var(--ink); color:var(--paper); text-align:center;}
+  .cierre .logo-mark{color:var(--paper); font-size:1.4rem;}
+  .cierre h2{color:var(--paper); font-size:clamp(1.8rem,4vw,2.6rem); max-width:720px; margin:0 auto 10px;}
+  .cierre .sub{font-weight:600; font-size:1.1rem; margin-bottom:34px;}
+  .cierre ul{list-style:none; display:grid; gap:10px; max-width:420px; margin:0 auto 44px; text-align:left;}
+  .cierre ul li{display:flex; gap:10px; align-items:baseline; color:var(--paper); opacity:.92;}
+  .cierre ul li::before{content:"—"; color:var(--yellow); font-weight:700;}
+  .cierre-bottom{margin-top:44px; display:flex; flex-direction:column; align-items:center; gap:18px;}
+
+  /* ---------- footer ---------- */
+  footer{padding:48px 0 40px; border-top:1px solid var(--line);}
+  .footer-grid{display:flex; justify-content:space-between; flex-wrap:wrap; gap:28px;}
+  .footer-brand p{color:var(--ink-soft); font-size:.9rem; max-width:34ch; margin-top:10px;}
+  .footer-links{display:flex; gap:22px; flex-wrap:wrap; font-size:.9rem; font-weight:600;}
+  .footer-links a{border-bottom:1px solid transparent;}
+  .footer-links a:hover{border-color:var(--ink);}
+  .footer-legal{
+    margin-top:32px; padding-top:24px; border-top:1px solid var(--line);
+    font-size:.8rem; color:var(--ink-soft); max-width:70ch;
+  }
+  .footer-contact{margin-top:14px; font-size:.85rem; color:var(--ink-soft); display:flex; gap:18px; flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="mailto:Ciudad360.jujuy@gmail.com">Ciudad360.jujuy@gmail.com</a>
+    <a href="tel:+5493886825636">+54 9 388 682-5636</a>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo-mark" href="#top">CIUDAD <span class="deg">360°</span></a>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
+        <span class="icon sun" aria-hidden="true">☀️</span><span class="icon moon" aria-hidden="true">🌙</span>
+      </button>
+      <a class="btn btn-primary btn-sm" href="#sumate">Sumate</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+  <section class="hero" id="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="deg-tag">000°</span><span>Punto de partida</span></div>
+        <h1>CIUDAD 360°</h1>
+        <p class="hero-tagline">Sumate y juntos construyamos la ciudad que queremos.</p>
+        <p class="hero-lead">Una ciudad se construye escuchando a quienes la viven todos los días.</p>
+        <p class="body">Ciudad 360° es un espacio para escuchar, conectar y transformar ideas en acciones. Queremos conocer lo que pasa en cada barrio, acompañar a quienes hacen, emprenden, crean y trabajan por nuestra ciudad, y construir propuestas desde la realidad de cada día.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#sumate">Sumate</a>
+          <a class="btn btn-ghost" href="#que-es">Conocé el proyecto</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="compass" aria-hidden="true">
+          <div class="ticks"></div>
+          <div class="needle"></div>
+          <div class="labels">
+            <span class="n">000°</span>
+            <span class="e">090°</span>
+            <span class="s">180°</span>
+            <span class="w">270°</span>
+          </div>
+          <div class="hub">
+            <strong>360°</strong>
+            <span>Toda la ciudad</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="que-es">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow"><span class="deg-tag">045°</span><span>¿Qué es Ciudad 360°?</span></div>
+        <h2>Una mirada completa sobre nuestra ciudad.</h2>
+        <p class="lede">Creemos que para transformar una ciudad hay que mirarla desde todos sus ángulos. Por eso queremos escuchar a:</p>
+      </div>
+      <div class="audience-grid">
+        <article class="audience-card">
+          <h3>Vecinos</h3>
+          <p>Personas que conocen de primera mano las necesidades y oportunidades de cada barrio.</p>
+        </article>
+        <article class="audience-card">
+          <h3>Emprendedores y empresas</h3>
+          <p>Quienes generan trabajo, desarrollan proyectos y hacen crecer nuestra ciudad.</p>
+        </article>
+        <article class="audience-card">
+          <h3>Instituciones y organizaciones</h3>
+          <p>Clubes, ONG, asociaciones, centros vecinales y organizaciones que trabajan todos los días en la comunidad.</p>
+        </article>
+        <article class="audience-card">
+          <h3>Jóvenes</h3>
+          <p>Nuevas ideas, nuevas formas de participar y una mirada diferente sobre el futuro.</p>
+        </article>
+        <article class="audience-card">
+          <h3>Referentes culturales y deportivos</h3>
+          <p>Personas que generan encuentros, identidad y oportunidades.</p>
+        </article>
+      </div>
+      <p class="closing-line">Ciudad 360° busca conectar esas miradas para construir una visión más completa de nuestra ciudad.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="que-hacer">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow"><span class="deg-tag">090°</span><span>¿Qué queremos hacer?</span></div>
+        <h2>Escuchar. Conocer. Conectar. Accionar.</h2>
+      </div>
+      <ol class="path">
+        <li>
+          <span class="path-num">01</span>
+          <div>
+            <h3>Escuchar</h3>
+            <p>Queremos conocer qué preocupa, qué falta y qué ideas tienen quienes viven y trabajan en nuestra ciudad.</p>
+          </div>
+        </li>
+        <li>
+          <span class="path-num">02</span>
+          <div>
+            <h3>Recorrer</h3>
+            <p>No queremos quedarnos detrás de una pantalla. Queremos ir a los barrios, conocer instituciones, emprendimientos y proyectos y hablar con quienes viven cada realidad.</p>
+          </div>
+        </li>
+        <li>
+          <span class="path-num">03</span>
+          <div>
+            <h3>Conectar</h3>
+            <p>Muchas veces las soluciones ya existen, pero están aisladas. Queremos conectar personas, instituciones, ideas y oportunidades.</p>
+          </div>
+        </li>
+        <li>
+          <span class="path-num">04</span>
+          <div>
+            <h3>Proponer</h3>
+            <p>Transformar las problemáticas y propuestas que surjan en proyectos concretos.</p>
+          </div>
+        </li>
+        <li>
+          <span class="path-num">05</span>
+          <div>
+            <h3>Hacer</h3>
+            <p>Porque escuchar tiene sentido cuando podemos convertir esa escucha en acciones.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="ciudad-360">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto; margin-right:auto; text-align:center;">
+        <div class="eyebrow" style="justify-content:center; display:flex;"><span class="deg-tag">135°</span><span>La ciudad en 360°</span></div>
+        <h2>Conocer la realidad desde todos sus ángulos.</h2>
+        <p class="lede" style="margin:0 auto;">Ciudad 360° va a recorrer distintos sectores y espacios de nuestra ciudad para conocer historias, proyectos, problemáticas y oportunidades.</p>
+      </div>
+
+      <div class="wheel-ring">
+        <div class="wheel-guide" aria-hidden="true"></div>
+        <div class="wheel-hub" aria-hidden="true"><strong>360°</strong><span>Nuestros ejes</span></div>
+
+        <div class="eje" style="--angle:0deg; --radius:300px;">
+          <div class="card"><h3>Barrios y vecinalismo</h3><p>Escuchar a quienes conocen y viven cada barrio.</p></div>
+        </div>
+        <div class="eje" style="--angle:45deg; --radius:300px;">
+          <div class="card"><h3>Emprendedurismo y empresas</h3><p>Impulsar ideas, proyectos y oportunidades de crecimiento.</p></div>
+        </div>
+        <div class="eje" style="--angle:90deg; --radius:300px;">
+          <div class="card"><h3>Deporte</h3><p>Conocer el trabajo de clubes, instituciones y personas que utilizan el deporte como herramienta de inclusión y desarrollo.</p></div>
+        </div>
+        <div class="eje" style="--angle:135deg; --radius:300px;">
+          <div class="card"><h3>Cultura</h3><p>Acompañar a quienes generan identidad y movimiento cultural.</p></div>
+        </div>
+        <div class="eje" style="--angle:180deg; --radius:300px;">
+          <div class="card"><h3>Juventud</h3><p>Incorporar nuevas voces e ideas para pensar la ciudad que viene.</p></div>
+        </div>
+        <div class="eje" style="--angle:225deg; --radius:300px;">
+          <div class="card"><h3>Instituciones y organizaciones</h3><p>Trabajar junto a quienes ya están haciendo cosas por la comunidad.</p></div>
+        </div>
+        <div class="eje" style="--angle:270deg; --radius:300px;">
+          <div class="card"><h3>Espacio público y ciudad</h3><p>Detectar necesidades y pensar propuestas para mejorar nuestros espacios y nuestra calidad de vida.</p></div>
+        </div>
+        <div class="eje" style="--angle:315deg; --radius:300px;">
+          <div class="card"><h3>Innovación y nuevas ideas</h3><p>Abrir la puerta a nuevas formas de hacer y pensar la ciudad.</p></div>
+        </div>
+      </div>
+      <p class="wheel-note">Girá la pantalla o ampliala para ver los ejes distribuidos en círculo.</p>
+    </div>
+  </section>
+
+  <section class="panel-tint" id="banco-ideas">
+    <div class="wrap panel-center">
+      <div class="eyebrow" style="justify-content:center; display:flex;"><span class="deg-tag">180°</span><span>Banco de ideas</span></div>
+      <h2>Las mejores ideas también están en la ciudad.</h2>
+      <p class="lede">Queremos construir un espacio donde las personas puedan compartir problemas, propuestas y posibles soluciones. Cada aporte puede convertirse en una nueva conversación, una visita, un proyecto o una propuesta.</p>
+      <a class="btn btn-primary" href="#sumate">Quiero dejar mi idea</a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="conoce-realidad">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow"><span class="deg-tag">225°</span><span>¿Querés que conozcamos tu realidad?</span></div>
+        <h2>Queremos estar donde las cosas pasan.</h2>
+        <p class="lede">Si tenés una problemática, un proyecto, un emprendimiento, una institución o simplemente algo que creés que deberíamos conocer, queremos escucharte.</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">¿Querés que te visitemos?</p>
+        <p class="qa-a">Sí. Porque conocer una realidad de primera mano permite entenderla de otra manera.</p>
+      </div>
+      <a class="btn btn-primary" href="#sumate">Quiero que me visiten</a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="sumate">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto; margin-right:auto; text-align:center;">
+        <div class="eyebrow" style="justify-content:center; display:flex;"><span class="deg-tag">270°</span><span>Sumate</span></div>
+        <h2>Tu mirada también es parte de la ciudad.</h2>
+        <p class="lede" style="margin:0 auto;">Queremos saber quién sos, qué te interesa, qué te preocupa y qué ideas tenés para nuestra ciudad.</p>
+      </div>
+
+      <div class="form-shell">
+        <form id="sumate-form" novalidate>
+          <fieldset>
+            <legend>Sobre vos</legend>
+            <div class="field">
+              <label for="f-nombre">Nombre y apellido</label>
+              <input id="f-nombre" name="nombre" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="f-celular">Celular / WhatsApp</label>
+              <input id="f-celular" name="celular" type="tel" autocomplete="tel" required>
+            </div>
+            <div class="field">
+              <label for="f-email">E-mail <span class="opt">(opcional)</span></label>
+              <input id="f-email" name="email" type="email" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="f-barrio">Barrio</label>
+              <input id="f-barrio" name="barrio" type="text" required>
+            </div>
+            <div class="field">
+              <label for="f-domicilio">Domicilio <span class="opt">(opcional)</span></label>
+              <input id="f-domicilio" name="domicilio" type="text">
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>¿Qué te interesa?</legend>
+            <p class="hint">Podés seleccionar más de una opción.</p>
+            <div class="pill-group" role="group" aria-label="Temas de interés">
+              <label class="pill"><input type="checkbox" name="interes" value="ONG / Organizaciones sociales"><span>ONG / Organizaciones sociales</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Deporte"><span>Deporte</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Cultura"><span>Cultura</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Emprendedurismo / Empresas"><span>Emprendedurismo / Empresas</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Vecinalismo"><span>Vecinalismo</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Educación"><span>Educación</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Ambiente"><span>Ambiente</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Juventud"><span>Juventud</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Espacios públicos"><span>Espacios públicos</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Seguridad y convivencia"><span>Seguridad y convivencia</span></label>
+              <label class="pill"><input type="checkbox" name="interes" value="Otro"><span>Otro</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Contanos</legend>
+            <div class="field">
+              <label for="f-problema">¿Qué problemática de tu barrio o de la ciudad te gustaría que conozcamos?</label>
+              <textarea id="f-problema" name="problema" rows="3"></textarea>
+            </div>
+            <div class="field">
+              <label for="f-sugerencia">¿Qué sugerencia o posible solución propondrías?</label>
+              <textarea id="f-sugerencia" name="sugerencia" rows="3"></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Queremos conocerlo de primera mano</legend>
+            <p class="hint">¿Te gustaría que te visitemos para conocer tu realidad, tu proyecto o la problemática que nos contaste?</p>
+            <div class="radio-group" role="radiogroup" aria-label="Preferencia de visita">
+              <label class="radio"><input type="radio" name="visita" value="Sí, me gustaría que me visiten" checked><span>Sí, me gustaría que me visiten</span></label>
+              <label class="radio"><input type="radio" name="visita" value="Me gustaría conversar primero"><span>Me gustaría conversar primero</span></label>
+              <label class="radio"><input type="radio" name="visita" value="Por ahora prefiero solamente dejar mi aporte"><span>Por ahora prefiero solamente dejar mi aporte</span></label>
+            </div>
+
+            <p class="hint">¿Cómo preferís que te contactemos?</p>
+            <div class="radio-group" role="radiogroup" aria-label="Medio de contacto">
+              <label class="radio"><input type="radio" name="contacto" value="WhatsApp" checked><span>WhatsApp</span></label>
+              <label class="radio"><input type="radio" name="contacto" value="Llamada"><span>Llamada</span></label>
+              <label class="radio"><input type="radio" name="contacto" value="E-mail"><span>E-mail</span></label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary btn-lg">Enviar mi aporte</button>
+          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="participa">
+    <div class="wrap panel-center">
+      <div class="eyebrow" style="justify-content:center; display:flex;"><span class="deg-tag">315°</span><span>Participá</span></div>
+      <h2>No hace falta tener todas las respuestas.</h2>
+      <p class="lede">A veces una buena pregunta puede abrir una gran conversación. Si tenés una idea, un proyecto, una propuesta o simplemente querés ser parte, sumate.</p>
+      <a class="btn btn-primary" href="#sumate">Quiero participar</a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="seguinos">
+    <div class="wrap">
+      <div class="eyebrow"><span class="deg-tag">340°</span><span>Seguí Ciudad 360°</span></div>
+      <h2 style="font-size:clamp(1.5rem,3vw,1.9rem); margin-bottom:12px;">Conocé nuestras recorridas, historias, proyectos y propuestas.</h2>
+      <div class="social-row">
+        <span class="social-chip">Instagram</span>
+        <span class="social-chip">TikTok</span>
+        <a class="social-chip live" href="https://wa.me/5493886825636" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="cierre" id="cierre">
+    <div class="wrap">
+      <div class="eyebrow" style="justify-content:center; display:flex; color:var(--ink-soft);"><span class="deg-tag">360°</span><span>Se cierra el círculo</span></div>
+      <h2>La ciudad no se construye desde un escritorio.</h2>
+      <p class="sub">Se construye caminándola.</p>
+      <ul>
+        <li>Escuchando a sus vecinos.</li>
+        <li>Conociendo sus barrios.</li>
+        <li>Acompañando a quienes hacen.</li>
+        <li>Conectando ideas.</li>
+        <li>Y transformando propuestas en acciones.</li>
+      </ul>
+      <div class="cierre-bottom">
+        <span class="logo-mark">CIUDAD <span class="deg">360°</span></span>
+        <p class="sub" style="margin:0;">Sumá y juntos construyamos la ciudad que queremos.</p>
+        <a class="btn btn-on-dark" href="#sumate">Sumate</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="logo-mark">CIUDAD <span class="deg">360°</span></span>
+        <p>Un espacio de participación, escucha y construcción ciudadana.</p>
+      </div>
+      <nav class="footer-links">
+        <a href="mailto:Ciudad360.jujuy@gmail.com">Contacto</a>
+        <a href="#seguinos">Redes sociales</a>
+        <a href="#privacidad">Política de privacidad</a>
+      </nav>
+    </div>
+    <p id="privacidad" class="footer-legal">Los datos proporcionados serán utilizados únicamente para los fines informados en el formulario y conforme a la normativa vigente sobre protección de datos personales.</p>
+    <div class="footer-contact">
+      <a href="mailto:Ciudad360.jujuy@gmail.com">Ciudad360.jujuy@gmail.com</a>
+      <a href="tel:+5493886825636">+54 9 388 682-5636</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var toggle = document.getElementById('theme-toggle');
+  var saved = null;
+  try{ saved = localStorage.getItem('ciudad360-theme'); }catch(e){}
+  if(saved === 'light' || saved === 'dark'){ root.setAttribute('data-theme', saved); }
+
+  function isDark(){
+    var attr = root.getAttribute('data-theme');
+    if(attr === 'dark') return true;
+    if(attr === 'light') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function syncToggle(){
+    toggle.setAttribute('aria-pressed', String(isDark()));
+    toggle.setAttribute('aria-label', isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+  }
+  syncToggle();
+  toggle.addEventListener('click', function(){
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('ciudad360-theme', next); }catch(e){}
+    syncToggle();
+  });
+})();
+
+(function(){
+  var form = document.getElementById('sumate-form');
+  var status = document.getElementById('form-status');
+
+  function val(id){ return document.getElementById(id).value.trim(); }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    status.className = 'form-status';
+
+    var nombre = val('f-nombre');
+    var celular = val('f-celular');
+    var barrio = val('f-barrio');
+
+    if (!nombre || !celular || !barrio){
+      status.textContent = 'Para enviar tu aporte completá al menos nombre, celular y barrio.';
+      status.className = 'form-status';
+      return;
+    }
+
+    var email = val('f-email');
+    var domicilio = val('f-domicilio');
+    var problema = val('f-problema');
+    var sugerencia = val('f-sugerencia');
+    var intereses = Array.prototype.slice.call(form.querySelectorAll('input[name="interes"]:checked')).map(function(i){ return i.value; });
+    var visita = (form.querySelector('input[name="visita"]:checked') || {}).value || '';
+    var contacto = (form.querySelector('input[name="contacto"]:checked') || {}).value || '';
+
+    var lineas = [
+      'Nuevo aporte — Ciudad 360°',
+      '',
+      'Nombre y apellido: ' + nombre,
+      'Celular / WhatsApp: ' + celular,
+      'E-mail: ' + (email || '-'),
+      'Barrio: ' + barrio,
+      'Domicilio: ' + (domicilio || '-'),
+      '',
+      'Le interesa: ' + (intereses.length ? intereses.join(', ') : '-'),
+      '',
+      'Problemática: ' + (problema || '-'),
+      'Sugerencia: ' + (sugerencia || '-'),
+      '',
+      'Preferencia de visita: ' + visita,
+      'Prefiere que lo contacten por: ' + contacto
+    ];
+    var resumen = lineas.join('\n');
+
+    if (contacto === 'WhatsApp'){
+      window.open('https://wa.me/5493886825636?text=' + encodeURIComponent(resumen), '_blank');
+      status.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Se abrió WhatsApp con tu aporte cargado — solo falta que lo envíes.';
+    } else {
+      window.location.href = 'mailto:Ciudad360.jujuy@gmail.com?subject=' + encodeURIComponent('Nuevo aporte — Ciudad 360° (' + nombre + ')') + '&body=' + encodeURIComponent(resumen);
+      status.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Se abrió tu correo con el aporte cargado. Si no se abrió, escribinos a Ciudad360.jujuy@gmail.com.';
+    }
+    status.className = 'form-status ok';
+  });
+})();
+</script>
+</body>
+</html>
