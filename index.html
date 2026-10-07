@@ -101,6 +101,36 @@
     padding:.1em .38em; border-radius:.3em; font-weight:700;
   }
 
+  .nav-links{display:flex; align-items:center; gap:24px; list-style:none; font-weight:600; font-size:.86rem;}
+  .nav-links a{display:inline-block; padding:6px 1px; border-bottom:2px solid transparent;}
+  .nav-links a:hover{border-color:var(--yellow);}
+  .nav-links .cta-item{display:none;}
+  .nav-burger{
+    display:none; width:40px; height:40px; border-radius:12px; flex-shrink:0;
+    border:1.5px solid var(--line); background:var(--surface);
+    flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer;
+  }
+  .nav-burger span{display:block; width:18px; height:2px; background:var(--ink); border-radius:2px; transition:transform .2s ease, opacity .2s ease;}
+  .nav-burger.open span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  .nav-burger.open span:nth-child(2){opacity:0;}
+  .nav-burger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+
+  @media (max-width:860px){
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0; background:var(--paper);
+      border-bottom:1px solid var(--line); flex-direction:column; align-items:stretch;
+      gap:0; padding:4px 24px 14px; display:none;
+    }
+    .nav-links.open{display:flex;}
+    .nav-links li{border-top:1px solid var(--line);}
+    .nav-links li:first-child{border-top:none;}
+    .nav-links a{display:block; padding:13px 0; border-bottom:none;}
+    .nav-links .cta-item{display:list-item;}
+    .nav-links .cta-item a{color:var(--yellow-ink); font-weight:700;}
+    .nav-burger{display:flex;}
+    .nav-cta{display:none;}
+  }
+
   .nav-right{display:flex; align-items:center; gap:10px;}
   .theme-toggle{
     width:40px; height:40px; border-radius:50%; flex-shrink:0;
@@ -188,6 +218,20 @@
   .compass .labels .e{right:-6px; top:50%; transform:translateY(-50%);}
   .compass .labels .s{bottom:-2px; left:50%; transform:translateX(-50%);}
   .compass .labels .w{left:-6px; top:50%; transform:translateY(-50%);}
+
+  /* ---------- video band (ciudad desde arriba) ---------- */
+  .video-band{position:relative; min-height:380px; display:flex; align-items:center; overflow:hidden;}
+  .video-band-media{position:absolute; inset:0; background:var(--ink);}
+  .video-band-media video, .video-band-media img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  }
+  .video-band-media::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,9,5,.25), rgba(10,9,5,.6));
+  }
+  .video-band-copy{position:relative; z-index:1; padding:64px 0;}
+  .video-band-copy .eyebrow{color:#EFE9CE;}
+  .video-band-copy h2{color:#fff; max-width:620px;}
 
   /* ---------- section heads ---------- */
   .section-head{max-width:640px; margin-bottom:46px;}
@@ -355,11 +399,24 @@
 <nav class="nav">
   <div class="nav-inner">
     <a class="logo-mark" href="#top">CIUDAD <span class="deg">360°</span></a>
+
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#que-es">Qué es</a></li>
+      <li><a href="#que-hacer">Qué hacemos</a></li>
+      <li><a href="#ciudad-360">La ciudad</a></li>
+      <li><a href="#banco-ideas">Banco de ideas</a></li>
+      <li><a href="#participa">Participá</a></li>
+      <li class="cta-item"><a href="#sumate">Sumate</a></li>
+    </ul>
+
     <div class="nav-right">
       <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
         <span class="icon sun" aria-hidden="true">☀️</span><span class="icon moon" aria-hidden="true">🌙</span>
       </button>
-      <a class="btn btn-primary btn-sm" href="#sumate">Sumate</a>
+      <a class="btn btn-primary btn-sm nav-cta" href="#sumate">Sumate</a>
+      <button id="nav-toggle" class="nav-burger" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </nav>
@@ -395,6 +452,18 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="video-band" id="ciudad-dron">
+    <div class="video-band-media">
+      <video autoplay muted loop playsinline poster="assets/img/ciudad-dron-poster.jpg">
+        <source src="assets/video/ciudad-dron.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="wrap video-band-copy">
+      <div class="eyebrow"><span class="deg-tag">020°</span><span>La ciudad desde arriba</span></div>
+      <h2>Una ciudad se ve distinto cuando la mirás por completo.</h2>
     </div>
   </section>
 
@@ -709,6 +778,27 @@
 </footer>
 
 <script>
+(function(){
+  var burger = document.getElementById('nav-toggle');
+  var links = document.getElementById('nav-links');
+  function closeMenu(){
+    links.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  }
+  burger.addEventListener('click', function(){
+    var open = links.classList.toggle('open');
+    burger.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', String(open));
+  });
+  links.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', closeMenu);
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closeMenu();
+  });
+})();
+
 (function(){
   var root = document.documentElement;
   var toggle = document.getElementById('theme-toggle');
