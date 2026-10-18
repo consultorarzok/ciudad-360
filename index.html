@@ -275,6 +275,44 @@
   .section-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem); margin-bottom:14px;}
 
   /* ---------- audience grid (que es) ---------- */
+  /* ---------- planeta Ciudad 360° (qué es) ---------- */
+  .que-es-top{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:32px; align-items:center; margin-bottom:36px;}
+  .que-es-top .section-head{margin-bottom:0;}
+  @media (max-width:860px){
+    .que-es-top{grid-template-columns:1fr; gap:8px;}
+    .que-es-top .planeta{order:-1;}
+  }
+  .planeta{position:relative; width:min(520px, 100%); aspect-ratio:1; margin:0 auto; user-select:none;}
+  .planeta > svg, .pl-glow{position:absolute; inset:0; width:100%; height:100%;}
+  .pl-back{z-index:0;} .pl-glow{z-index:1;} .pl-world{z-index:2; overflow:visible;} .pl-front{z-index:3;}
+  .pl-glow{
+    background:radial-gradient(circle at 50% 50%, rgba(255,235,5,.38) 0, rgba(255,235,5,.14) 30%, rgba(255,235,5,0) 46%);
+    animation:pl-breathe 6s ease-in-out infinite;
+  }
+  @keyframes pl-breathe{50%{transform:scale(1.06); opacity:.8;}}
+  .pl-orbits ellipse, .pl-orbits path{fill:none; stroke:var(--ink-soft); stroke-width:1.2; stroke-dasharray:3 6;}
+  .pl-back ellipse{opacity:.35;}
+  .pl-front path{opacity:.6;}
+  .pl-city .b{fill:var(--ink);}
+  .pl-city .w{fill:var(--yellow);}
+  .pl-city .t{fill:#3E8E4E;}
+  .pl-ground .p{fill:#E9CB00;}
+  .pl-ground .r{fill:none; stroke:rgba(26,26,21,.18); stroke-width:3;}
+  .planeta.pl-paused .pl-glow, .planeta.pl-paused .pl-stars circle{animation-play-state:paused;}
+  .pl-stars circle{fill:var(--ink-soft); animation:pl-twinkle 3.2s ease-in-out infinite;}
+  @keyframes pl-twinkle{50%{opacity:.15;}}
+  .pl-name{font-family:'Fredoka',sans-serif; font-weight:700; font-size:30px; fill:var(--yellow-ink); letter-spacing:.02em;}
+  .pl-deg{font-family:'Fredoka',sans-serif; font-weight:700; font-size:40px; fill:var(--yellow-ink);}
+  .pl-ejes{list-style:none; position:absolute; inset:0; margin:0; padding:0; pointer-events:none;}
+  .pl-ejes li{
+    position:absolute; left:50%; top:50%; white-space:nowrap;
+    padding:5px 11px; border-radius:999px; font-size:.8rem; font-weight:700; line-height:1.2;
+    background:var(--paper); color:var(--ink); border:1.5px solid var(--yellow);
+    box-shadow:0 6px 16px -10px rgba(0,0,0,.45);
+    transform:translate(-50%,-50%); will-change:transform, opacity;
+  }
+  @media (max-width:520px){ .pl-ejes li{font-size:.66rem; padding:3px 8px;} }
+
   .audience-grid{
     display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-bottom:28px;
   }
@@ -685,10 +723,42 @@
   <div class="tab-panel" id="tab-que-es" data-tab="que-es">
   <section id="que-es">
     <div class="wrap">
+      <div class="que-es-top">
       <div class="section-head">
         <div class="eyebrow"><span class="deg-tag">045°</span><span>¿Qué es Ciudad 360°?</span></div>
         <h2>Una mirada completa sobre nuestra ciudad.</h2>
         <p class="lede">Creemos que para transformar una ciudad hay que mirarla desde todos sus ángulos. Por eso queremos escuchar a:</p>
+      </div>
+      <div class="planeta" id="planeta" role="img" aria-label="Ciudad 360° como un planeta amarillo con una ciudad encima, y sus ejes girando alrededor: Barrios y vecinalismo, Emprendedurismo y empresas, Deporte, Cultura, Juventud, Instituciones y organizaciones, Espacio público y ciudad, Innovación y nuevas ideas.">
+        <svg class="pl-orbits pl-back" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
+        <div class="pl-glow" aria-hidden="true"></div>
+        <svg class="pl-world" viewBox="-250 -250 500 500" aria-hidden="true">
+          <defs>
+            <radialGradient id="pl-sphere" cx="38%" cy="32%" r="75%">
+              <stop offset="0" stop-color="#FFF6A0"/>
+              <stop offset=".45" stop-color="#FFEB05"/>
+              <stop offset="1" stop-color="#D9B800"/>
+            </radialGradient>
+          </defs>
+          <g class="pl-stars"></g>
+          <g class="pl-spin"><g class="pl-city"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
+          <circle r="112" fill="url(#pl-sphere)"/>
+          <g class="pl-spin"><g class="pl-ground"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
+          <text class="pl-name" y="-4" text-anchor="middle">CIUDAD</text>
+          <text class="pl-deg" y="34" text-anchor="middle">360°</text>
+        </svg>
+        <svg class="pl-orbits pl-front" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
+        <ul class="pl-ejes" aria-hidden="true">
+          <li>Barrios y vecinalismo</li>
+          <li>Emprendedurismo y empresas</li>
+          <li>Deporte</li>
+          <li>Cultura</li>
+          <li>Juventud</li>
+          <li>Instituciones y organizaciones</li>
+          <li>Espacio público y ciudad</li>
+          <li>Innovación y nuevas ideas</li>
+        </ul>
+      </div>
       </div>
       <div class="audience-grid">
         <article class="audience-card">
@@ -1655,6 +1725,107 @@ window.C360Tabs = (function(){
     else if (dlg.open){ openedInPage = false; hide(); }
     if (!r.story) openedInPage = false;
   });
+})();
+</script>
+<script>
+/* ---------- planeta Ciudad 360°: ciudad sobre un planeta amarillo y los ejes en órbita ---------- */
+(function(){
+  var box = document.getElementById('planeta');
+  if (!box) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  var R = 112;
+  var world = box.querySelector('.pl-world');
+  function el(tag, attrs, parent){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+  var seed = 7; function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+
+  // edificios y árboles parados sobre la superficie, mirando hacia afuera
+  var city = box.querySelector('.pl-city');
+  var N = 30;
+  for (var i = 0; i < N; i++){
+    var a = i * 360 / N + (rnd() - .5) * 4;
+    var g = el('g', {transform:'rotate(' + a.toFixed(1) + ')'}, city);
+    if (i % 5 === 2){
+      el('rect', {x:-1.5, y:-(R + 12), width:3, height:14, 'class':'b'}, g);
+      el('circle', {cx:0, cy:-(R + 17), r:8, 'class':'t'}, g);
+      continue;
+    }
+    var w = 13 + Math.round(rnd() * 9), h = 16 + Math.round(rnd() * 34);
+    el('rect', {x:-w / 2, y:-(R + h), width:w, height:h + 4, rx:1.5, 'class':'b'}, g);
+    for (var y = R + h - 6; y > R + 4; y -= 7){
+      for (var x = -w / 2 + 3; x < w / 2 - 3; x += 5){
+        if (rnd() > .45) el('rect', {x:x, y:-y, width:2.4, height:3, 'class':'w'}, g);
+      }
+    }
+    if (rnd() > .7) el('rect', {x:-1, y:-(R + h + 7), width:2, height:7, 'class':'b'}, g);
+  }
+  // plazas y calles sobre el planeta
+  var ground = box.querySelector('.pl-ground');
+  [[-40,-52,26,14,-20],[48,38,30,16,25],[-52,48,22,12,40],[30,-62,18,10,10],[64,-18,14,9,-40]].forEach(function(p){
+    el('ellipse', {cx:p[0], cy:p[1], rx:p[2], ry:p[3], transform:'rotate(' + p[4] + ' ' + p[0] + ' ' + p[1] + ')', 'class':'p'}, ground);
+  });
+  el('circle', {r:R - 22, 'class':'r'}, ground);
+  // estrellas
+  var stars = box.querySelector('.pl-stars');
+  for (var s = 0; s < 22; s++){
+    var ang = rnd() * Math.PI * 2, dist = 175 + rnd() * 70;
+    var c = el('circle', {cx:(Math.cos(ang) * dist).toFixed(1), cy:(Math.sin(ang) * dist).toFixed(1), r:(1 + rnd() * 1.6).toFixed(1)}, stars);
+    c.style.animationDelay = (-rnd() * 3.2).toFixed(2) + 's';
+  }
+
+  // órbitas cruzadas (como un átomo): 3 anillos, los ejes repartidos entre ellos
+  var ORB = [{rx:222, ry:62, tilt:-18, speed:.00016}, {rx:212, ry:70, tilt:42, speed:-.00013}, {rx:204, ry:58, tilt:-72, speed:.00011}];
+  var back = box.querySelector('.pl-back'), front = box.querySelector('.pl-front');
+  ORB.forEach(function(o){
+    el('ellipse', {rx:o.rx, ry:o.ry, transform:'rotate(' + o.tilt + ')'}, back);
+    // mitad delantera (por delante del planeta)
+    el('path', {d:'M ' + o.rx + ' 0 A ' + o.rx + ' ' + o.ry + ' 0 0 1 ' + (-o.rx) + ' 0', transform:'rotate(' + o.tilt + ')'}, front);
+  });
+  var chips = [].slice.call(box.querySelectorAll('.pl-ejes li'));
+  var items = chips.map(function(li, k){
+    var orb = k % 3, same = chips.filter(function(_, j){ return j % 3 === orb; }).length, idx = Math.floor(k / 3);
+    return {li:li, o:ORB[orb], phase:idx * Math.PI * 2 / same + orb * .9};
+  });
+
+  function place(t){
+    var W = box.clientWidth / 500;
+    items.forEach(function(it){
+      var o = it.o, th = it.phase + t * o.speed;
+      var x0 = o.rx * Math.cos(th), y0 = o.ry * Math.sin(th);
+      var tr = o.tilt * Math.PI / 180;
+      var x = x0 * Math.cos(tr) - y0 * Math.sin(tr), y = x0 * Math.sin(tr) + y0 * Math.cos(tr);
+      var depth = Math.sin(th);                       // >0: por delante del planeta
+      var sc = .82 + .18 * (depth + 1) / 2;
+      // que el cartel nunca se salga del recuadro (en celular los nombres largos tocaban el borde)
+      var half = box.clientWidth / 2 - it.li.offsetWidth * sc / 2 - 2;
+      var px = Math.max(-half, Math.min(half, x * W));
+      it.li.style.transform = 'translate(-50%,-50%) translate(' + px.toFixed(1) + 'px,' + (y * W).toFixed(1) + 'px) scale(' + sc.toFixed(3) + ')';
+      it.li.style.zIndex = depth > 0 ? 4 : 0;
+      it.li.style.opacity = depth > 0 ? 1 : (.35 + .4 * (1 + depth)).toFixed(2);
+    });
+  }
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var running = false, visible = false, t0 = null, tPaused = 0;
+  function frame(now){
+    if (!running) return;
+    if (t0 === null) t0 = now - tPaused;
+    tPaused = now - t0;
+    place(tPaused);
+    requestAnimationFrame(frame);
+  }
+  function update(){
+    var on = visible && !reduced && !document.hidden;
+    if (on && !running){ running = true; t0 = null; requestAnimationFrame(frame); }
+    if (!on) running = false;
+    box.classList.toggle('pl-paused', !on);
+    if (world.pauseAnimations){ if (on) world.unpauseAnimations(); else world.pauseAnimations(); }
+  }
+  place(0);
+  window.addEventListener('resize', function(){ place(tPaused); });
+  document.addEventListener('visibilitychange', update);
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ visible = es[0].isIntersecting; update(); }).observe(box);
+  } else { visible = true; update(); }
 })();
 </script>
 </body>
