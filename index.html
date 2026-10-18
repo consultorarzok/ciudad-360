@@ -410,6 +410,25 @@
   .radio input:checked + span::before{border-color:var(--yellow-ink); background:radial-gradient(var(--yellow-ink) 0 40%, transparent 42%);}
   .radio input:focus-visible + span{outline:3px solid var(--yellow); outline-offset:2px;}
 
+  .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
+  .form-step h3{font-size:clamp(1.25rem,2.6vw,1.5rem); margin-bottom:8px;}
+  .review-list{margin:18px 0 26px; display:grid; gap:0; border-top:1px solid var(--line);}
+  .review-list div{display:grid; grid-template-columns:minmax(120px, 34%) 1fr; gap:4px 18px; padding:11px 0; border-bottom:1px solid var(--line);}
+  .review-list dt{font-weight:600; font-size:.88rem; color:var(--ink-soft);}
+  .review-list dd{margin:0; font-size:.95rem; overflow-wrap:anywhere; white-space:pre-line;}
+  @media (max-width:520px){ .review-list div{grid-template-columns:1fr;} }
+  .step-actions{display:flex; gap:12px; flex-wrap:wrap;}
+  .btn[disabled]{opacity:.65; cursor:progress; transform:none;}
+  .form-done{text-align:center; padding:12px 0;}
+  .done-mark{
+    width:64px; height:64px; border-radius:50%; background:var(--yellow); color:var(--yellow-ink);
+    display:inline-flex; align-items:center; justify-content:center; margin-bottom:18px;
+  }
+  .done-mark svg{width:32px; height:32px; fill:none; stroke:currentColor; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round;}
+  .done-text{color:var(--ink-soft); max-width:46ch; margin:0 auto 10px;}
+  .done-code{font-size:.9rem; color:var(--ink-soft); margin-bottom:26px;}
+  .done-code strong{color:var(--ink); font-variant-numeric:tabular-nums; letter-spacing:.02em;}
+  .form-status a{text-decoration:underline; text-underline-offset:3px;}
   .form-status{margin-top:16px; font-size:.9rem; font-weight:600; min-height:1.4em;}
   .form-status.ok{color:#3f7a3f;}
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .form-status.ok{color:#8fcf8f;} }
@@ -924,9 +943,33 @@
             </div>
           </fieldset>
 
+          <div class="hp" aria-hidden="true">
+            <label for="f-sitio">No completar</label>
+            <input id="f-sitio" name="sitio_web" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
           <button type="submit" class="btn btn-primary btn-lg">Enviar mi aporte</button>
           <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
         </form>
+
+        <div id="sumate-review" class="form-step" hidden tabindex="-1" aria-labelledby="review-title">
+          <h3 id="review-title">Revisá tus datos antes de enviar</h3>
+          <p class="hint">Si está todo bien, confirmá. Si querés cambiar algo, tocá «Corregir».</p>
+          <dl class="review-list" id="review-list"></dl>
+          <div class="step-actions">
+            <button type="button" class="btn btn-primary" id="review-send">Confirmar y enviar</button>
+            <button type="button" class="btn btn-ghost" id="review-edit">Corregir</button>
+          </div>
+          <p id="review-status" class="form-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <div id="sumate-done" class="form-step form-done" hidden tabindex="-1" aria-labelledby="done-title">
+          <span class="done-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <h3 id="done-title">¡Listo! Tus datos ya están cargados.</h3>
+          <p class="done-text">Recibimos tu aporte. Gracias por sumar tu mirada a Ciudad 360°.</p>
+          <p class="done-code">Código de tu aporte: <strong id="done-code"></strong></p>
+          <button type="button" class="btn btn-primary" id="done-again">Cargar otro aporte</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1162,8 +1205,19 @@ window.C360Tabs = (function(){
 })();
 
 (function(){
+  // los aportes se guardan en la planilla «Ciudad 360 - Aportes de la página» (Drive, carpeta Ciudad 360) vía n8n
+  var ENDPOINT = 'https://n8n.consultorarz.com/webhook/ciudad360-aporte';
   var form = document.getElementById('sumate-form');
   var status = document.getElementById('form-status');
+  var review = document.getElementById('sumate-review');
+  var reviewList = document.getElementById('review-list');
+  var reviewStatus = document.getElementById('review-status');
+  var sendBtn = document.getElementById('review-send');
+  var editBtn = document.getElementById('review-edit');
+  var done = document.getElementById('sumate-done');
+  var againBtn = document.getElementById('done-again');
+  var codeEl = document.getElementById('done-code');
+  var datos = null;
 
   function val(id){ return document.getElementById(id).value.trim(); }
 
@@ -1196,33 +1250,96 @@ window.C360Tabs = (function(){
     var visita = (form.querySelector('input[name="visita"]:checked') || {}).value || '';
     var contacto = (form.querySelector('input[name="contacto"]:checked') || {}).value || '';
 
-    var lineas = [
-      'Nuevo aporte — Ciudad 360°',
-      '',
-      'Nombre y apellido: ' + nombre,
-      'Celular / WhatsApp: ' + celular,
-      'E-mail: ' + (email || '-'),
-      'Barrio: ' + barrio,
-      'Domicilio: ' + (domicilio || '-'),
-      '',
-      'Le interesa: ' + (intereses.length ? intereses.join(', ') : '-'),
-      '',
-      'Problemática: ' + (problema || '-'),
-      'Sugerencia: ' + (sugerencia || '-'),
-      '',
-      'Preferencia de visita: ' + visita,
-      'Prefiere que lo contacten por: ' + contacto
-    ];
-    var resumen = lineas.join('\n');
+    datos = {
+      nombre: nombre, celular: celular, email: email, barrio: barrio, domicilio: domicilio,
+      intereses: intereses, problema: problema, sugerencia: sugerencia, visita: visita, contacto: contacto,
+      sitio_web: val('f-sitio')
+    };
+    showReview();
+  });
 
-    if (contacto === 'WhatsApp'){
-      window.open('https://wa.me/5493886825636?text=' + encodeURIComponent(resumen), '_blank');
-      status.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Se abrió WhatsApp con tu aporte cargado — solo falta que lo envíes.';
-    } else {
-      window.location.href = 'mailto:Ciudad360.jujuy@gmail.com?subject=' + encodeURIComponent('Nuevo aporte — Ciudad 360° (' + nombre + ')') + '&body=' + encodeURIComponent(resumen);
-      status.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Se abrió tu correo con el aporte cargado. Si no se abrió, escribinos a Ciudad360.jujuy@gmail.com.';
-    }
-    status.className = 'form-status ok';
+  function showReview(){
+    var filas = [
+      ['Nombre y apellido', datos.nombre], ['Celular / WhatsApp', datos.celular], ['E-mail', datos.email],
+      ['Barrio', datos.barrio], ['Domicilio', datos.domicilio],
+      ['Te interesa', datos.intereses.join(', ')], ['Problemática', datos.problema],
+      ['Sugerencia o solución', datos.sugerencia], ['Visita', datos.visita], ['Contacto por', datos.contacto]
+    ];
+    reviewList.innerHTML = '';
+    filas.forEach(function(f){
+      if (!f[1]) return;
+      var row = document.createElement('div');
+      var dt = document.createElement('dt'); dt.textContent = f[0];
+      var dd = document.createElement('dd'); dd.textContent = f[1];
+      row.appendChild(dt); row.appendChild(dd); reviewList.appendChild(row);
+    });
+    reviewStatus.textContent = ''; reviewStatus.className = 'form-status';
+    show(review);
+  }
+
+  function show(panel){
+    [form, review, done].forEach(function(el){ el.hidden = el !== panel; });
+    var shell = form.parentNode;
+    var top = shell.getBoundingClientRect().top + window.pageYOffset - document.querySelector('.nav').getBoundingClientRect().height - 16;
+    if (shell.getBoundingClientRect().top < 0) window.scrollTo(0, Math.max(0, top));
+    if (panel !== form) panel.focus({preventScroll:true});
+  }
+
+  function setSending(on){
+    sendBtn.disabled = editBtn.disabled = on;
+    sendBtn.textContent = on ? 'Enviando…' : 'Confirmar y enviar';
+  }
+
+  function fallbackLink(){
+    var resumen = 'Nuevo aporte — Ciudad 360°\n\nNombre: ' + datos.nombre + '\nCelular: ' + datos.celular + '\nBarrio: ' + datos.barrio +
+      (datos.problema ? '\nProblemática: ' + datos.problema : '') + (datos.sugerencia ? '\nSugerencia: ' + datos.sugerencia : '');
+    return 'https://wa.me/5493886825636?text=' + encodeURIComponent(resumen);
+  }
+
+  sendBtn.addEventListener('click', function(){
+    if (!datos || sendBtn.disabled) return;
+    setSending(true);
+    reviewStatus.textContent = ''; reviewStatus.className = 'form-status';
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 20000);
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=UTF-8'},
+      body: JSON.stringify(datos),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){ if (!r.ok || !j.ok) throw new Error(j.error || r.status); return j; });
+    }).then(function(j){
+      clearTimeout(timer);
+      setSending(false);
+      document.getElementById('done-title').textContent = '¡Listo, ' + datos.nombre.split(' ')[0] + '! Tus datos ya están cargados.';
+      codeEl.textContent = j.codigo || '—';
+      codeEl.parentNode.hidden = !j.codigo;
+      show(done);
+    }).catch(function(){
+      clearTimeout(timer);
+      setSending(false);
+      reviewStatus.className = 'form-status err';
+      reviewStatus.innerHTML = '';
+      reviewStatus.appendChild(document.createTextNode('No pudimos guardar tu aporte. Revisá tu conexión y volvé a tocar «Confirmar y enviar», o '));
+      var a = document.createElement('a'); a.href = fallbackLink(); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'mandalo por WhatsApp';
+      reviewStatus.appendChild(a); reviewStatus.appendChild(document.createTextNode('.'));
+    });
+  });
+
+  editBtn.addEventListener('click', function(){
+    show(form);
+    document.getElementById('f-nombre').focus();
+  });
+
+  // otro aporte: se mantienen los datos personales, se limpia lo que contó
+  againBtn.addEventListener('click', function(){
+    ['f-problema','f-sugerencia'].forEach(function(id){ document.getElementById(id).value = ''; });
+    form.querySelectorAll('input[name="interes"]').forEach(function(i){ i.checked = false; });
+    status.textContent = ''; status.className = 'form-status';
+    datos = null;
+    show(form);
+    document.getElementById('f-problema').focus();
   });
 })();
 </script>
