@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>document.documentElement.className+=' js';</script>
 <title>Ciudad 360°</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23FFEB05%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-weight=%22700%22 font-size=%2224%22 fill=%22%231A1A15%22%3E360%3C/text%3E%3C/svg%3E">
+<link rel="preload" as="image" href="assets/img/ciudad-dron-poster.jpg">
 <meta name="description" content="Ciudad 360°: un espacio para escuchar, conectar y transformar ideas en acciones para la ciudad.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Ciudad 360°">
@@ -26,6 +28,7 @@
     --line:#E8E4D4;
     --tint:#FFF9DC;
     --tint-line:#F0E6A8;
+    --err:#B42318;
     --radius-card:18px;
     --maxw:1120px;
     color-scheme: light dark;
@@ -39,6 +42,7 @@
       --line:#322E1C;
       --tint:#2B2708;
       --tint-line:#473F14;
+      --err:#FF8A7A;
     }
   }
   :root[data-theme="dark"]{
@@ -49,6 +53,7 @@
     --line:#322E1C;
     --tint:#2B2708;
     --tint-line:#473F14;
+    --err:#FF8A7A;
   }
 
   *{box-sizing:border-box;}
@@ -74,6 +79,7 @@
   button{font-family:inherit;}
   ul,ol{margin:0; padding:0;}
   img{max-width:100%;}
+  ::selection{background:var(--yellow); color:var(--yellow-ink);}
   :focus-visible{outline:3px solid var(--yellow); outline-offset:2px; border-radius:6px;}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
@@ -131,22 +137,23 @@
   .nav-right{display:flex; align-items:center; gap:10px;}
   .theme-toggle{
     width:40px; height:40px; border-radius:50%; flex-shrink:0;
-    border:1.5px solid var(--line); background:var(--surface);
+    border:1.5px solid var(--line); background:var(--surface); color:var(--ink);
     display:inline-flex; align-items:center; justify-content:center;
     font-size:1.05rem; cursor:pointer; line-height:1;
     transition:border-color .15s ease, transform .15s ease;
   }
   .theme-toggle:hover{border-color:var(--ink-soft); transform:translateY(-1px);}
+  .theme-toggle svg{width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round;}
   .theme-toggle .icon{display:none;}
-  .theme-toggle .icon.moon{display:inline;}
+  .theme-toggle .icon.moon{display:block;}
   @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]) .theme-toggle .icon.sun{display:inline;}
+    :root:not([data-theme="light"]) .theme-toggle .icon.sun{display:block;}
     :root:not([data-theme="light"]) .theme-toggle .icon.moon{display:none;}
   }
-  :root[data-theme="dark"] .theme-toggle .icon.sun{display:inline;}
+  :root[data-theme="dark"] .theme-toggle .icon.sun{display:block;}
   :root[data-theme="dark"] .theme-toggle .icon.moon{display:none;}
   :root[data-theme="light"] .theme-toggle .icon.sun{display:none;}
-  :root[data-theme="light"] .theme-toggle .icon.moon{display:inline;}
+  :root[data-theme="light"] .theme-toggle .icon.moon{display:block;}
 
   /* ---------- buttons ---------- */
   .btn{
@@ -180,18 +187,64 @@
   .lede{font-size:1.1rem; color:var(--ink-soft); max-width:62ch;}
   .divider{height:1px; background:var(--line); max-width:var(--maxw); margin:0 auto;}
 
-  /* ---------- hero ---------- */
-  .hero{padding-top:64px;}
-  .hero-grid{display:grid; grid-template-columns:1.2fr 1fr; gap:56px; align-items:center;}
-  @media (max-width:860px){.hero-grid{grid-template-columns:1fr;}}
-  .hero h1{font-size:clamp(2.6rem, 6vw, 4.4rem); margin-bottom:8px;}
-  .hero-tagline{font-size:clamp(1.05rem,2.2vw,1.3rem); font-weight:700; margin:10px 0 18px; max-width:30ch;}
-  .hero-lead{font-weight:600; font-size:1.05rem; margin-bottom:10px;}
-  .hero p.body{color:var(--ink-soft); margin-bottom:10px; max-width:58ch;}
-  .cta-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:26px;}
+  /* ---------- hero: la ciudad desde el dron, primero que todo ---------- */
+  .hero{
+    position:relative; isolation:isolate; overflow:hidden; padding:0;
+    min-height:clamp(560px, calc(100svh - 66px), 860px);
+    display:flex; align-items:flex-end;
+    background:#0E0D07 center/cover no-repeat url("assets/img/ciudad-dron-poster.jpg");
+    color:#F7F3E3;
+  }
+  .hero-media{position:absolute; inset:0; z-index:-1;}
+  .hero-media video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .hero-media::after{
+    content:""; position:absolute; inset:0;
+    background:
+      linear-gradient(90deg, rgba(10,9,5,.85) 0%, rgba(10,9,5,.66) 48%, rgba(10,9,5,.08) 82%),
+      linear-gradient(0deg, rgba(10,9,5,.7) 0%, rgba(10,9,5,0) 45%);
+  }
+  .hero-copy{width:100%; padding-top:72px; padding-bottom:clamp(48px, 9vh, 88px);}
+  .hero-copy > *{max-width:600px;}
+  .hero .eyebrow{color:#E6DFC2;}
+  .hero h1{
+    color:#fff; font-size:clamp(2.8rem, 7vw, 5.4rem); letter-spacing:-.01em; margin-bottom:6px;
+  }
+  .hero-tagline{font-size:clamp(1.12rem,2.2vw,1.4rem); font-weight:700; margin:10px 0 22px; max-width:30ch; color:#fff;}
+  .hero-lead{font-weight:600; font-size:1.05rem; margin-bottom:10px; color:#fff;}
+  .hero p.body{color:#DCD6C2; margin-bottom:10px; max-width:56ch;}
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:28px;}
+  .btn-ghost-light{background:rgba(10,9,5,.25); color:#fff; border-color:rgba(255,255,255,.55);}
+  .btn-ghost-light:hover{border-color:#fff; background:rgba(10,9,5,.45);}
+  .video-toggle{
+    position:absolute; right:clamp(16px, 3vw, 32px); bottom:clamp(16px, 3vw, 32px); z-index:2;
+    width:44px; height:44px; border-radius:50%; cursor:pointer;
+    border:1.5px solid rgba(255,255,255,.5); background:rgba(10,9,5,.45); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .video-toggle:hover{background:rgba(10,9,5,.7); border-color:#fff;}
+  .video-toggle svg{width:18px; height:18px; fill:currentColor;}
+  .video-toggle .i-play{display:none;}
+  .video-toggle[aria-pressed="true"] .i-play{display:block;}
+  .video-toggle[aria-pressed="true"] .i-pause{display:none;}
+  @media (max-width:760px){
+    .hero{min-height:calc(100svh - 112px);}
+    .hero-media::after{
+      background:linear-gradient(0deg, rgba(10,9,5,.92) 0%, rgba(10,9,5,.8) 52%, rgba(10,9,5,.25) 82%, rgba(10,9,5,.1) 100%);
+    }
+    .hero-copy{padding-top:120px; padding-bottom:84px;}
+    .hero-tagline{margin-bottom:16px;}
+    .video-toggle{bottom:20px;}
+  }
 
-  .hero-visual{display:flex; justify-content:center;}
-  .compass{position:relative; width:min(300px,78vw); aspect-ratio:1;}
+  /* ---------- mirada (frase + brújula) ---------- */
+  .mirada-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:56px; align-items:center;}
+  .mirada h2{font-size:clamp(1.8rem,4vw,2.8rem); max-width:16ch;}
+  @media (max-width:860px){
+    .mirada-grid{grid-template-columns:1fr; gap:40px;}
+    .mirada .compass{justify-self:center;}
+  }
+  .compass{position:relative; width:min(300px,72vw); aspect-ratio:1; justify-self:end;}
   .compass .ticks{
     position:absolute; inset:0; border-radius:50%;
     background:repeating-conic-gradient(var(--line) 0deg 1.3deg, transparent 1.3deg 9deg);
@@ -216,22 +269,6 @@
   .compass .labels .e{right:-6px; top:50%; transform:translateY(-50%);}
   .compass .labels .s{bottom:-2px; left:50%; transform:translateX(-50%);}
   .compass .labels .w{left:-6px; top:50%; transform:translateY(-50%);}
-
-  /* ---------- video band (ciudad desde arriba) ---------- */
-  .video-band{position:relative; min-height:380px; display:flex; align-items:center; overflow:hidden;}
-  .video-band-media{
-    position:absolute; inset:0; background:var(--ink) center/cover no-repeat url("assets/img/ciudad-dron-poster.jpg");
-  }
-  .video-band-media video, .video-band-media img{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-  }
-  .video-band-media::after{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(10,9,5,.25), rgba(10,9,5,.6));
-  }
-  .video-band-copy{position:relative; z-index:1; padding:64px 0;}
-  .video-band-copy .eyebrow{color:#EFE9CE;}
-  .video-band-copy h2{color:#fff; max-width:620px;}
 
   /* ---------- section heads ---------- */
   .section-head{max-width:640px; margin-bottom:46px;}
@@ -312,11 +349,11 @@
   }
   .panel-tint > .wrap{position:relative; z-index:1;}
   .panel-center{max-width:620px; margin:0 auto; text-align:center;}
-  .panel-center h2{margin-bottom:14px;}
+  .panel-center h2{font-size:clamp(1.7rem,3.6vw,2.4rem); margin-bottom:14px;}
   .panel-center .lede{margin:0 auto 26px; }
 
   /* ---------- qa block ---------- */
-  .qa{border-left:3px solid var(--yellow); padding-left:20px; margin:28px 0;}
+  .qa{background:var(--tint); border:1px solid var(--tint-line); border-radius:var(--radius-card); padding:20px 24px; margin:28px 0; max-width:62ch;}
   .qa-q{font-weight:700; font-size:1.05rem; margin-bottom:6px;}
   .qa-a{color:var(--ink-soft);}
 
@@ -342,6 +379,9 @@
   }
   .field input:focus, .field textarea:focus{outline:none; border-color:var(--yellow);}
   .field textarea{resize:vertical;}
+  .field .req{color:var(--ink-soft);}
+  .field input[aria-invalid="true"]{border-color:var(--err);}
+  .form-status.err{color:var(--err);}
 
   .pill-group{display:flex; flex-wrap:wrap; gap:9px;}
   .pill{position:relative;}
@@ -381,6 +421,7 @@
     display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:999px;
     border:1.5px solid var(--line); font-weight:600; font-size:.9rem; color:var(--ink-soft);
   }
+  span.social-chip{border-style:dashed; cursor:default;}
   .social-chip.live{color:var(--ink); border-color:var(--yellow); background:var(--tint);}
 
   /* ---------- cierre ---------- */
@@ -506,9 +547,11 @@
   .historia-scroll{overflow-y:auto; overscroll-behavior:contain; flex:1;}
   .historia-close{
     position:absolute; top:12px; right:12px; z-index:3;
-    width:42px; height:42px; border-radius:50%; border:none; cursor:pointer;
+    width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
     background:rgba(10,9,5,.62); color:#fff; font-size:1.25rem; line-height:1;
   }
+  .historia-close, .hg-nav{display:inline-flex; align-items:center; justify-content:center;}
+  .historia-close svg, .hg-nav svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;}
   .historia-close:hover{background:rgba(10,9,5,.85);}
   .hg{position:relative; background:#0E0D07;}
   .hg-track{
@@ -522,7 +565,7 @@
   }
   .hg-nav{
     position:absolute; top:50%; transform:translateY(-50%); z-index:2;
-    width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+    width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
     background:rgba(10,9,5,.55); color:#fff; font-size:1.1rem;
   }
   .hg-nav:hover{background:rgba(10,9,5,.8);}
@@ -562,7 +605,7 @@
 
     <div class="nav-right">
       <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Cambiar a modo oscuro">
-        <span class="icon sun" aria-hidden="true">☀️</span><span class="icon moon" aria-hidden="true">🌙</span>
+        <svg class="icon sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="icon moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/></svg>
       </button>
     </div>
   </div>
@@ -572,46 +615,49 @@
 
   <div class="tab-panel" id="tab-inicio" data-tab="inicio">
   <section class="hero" id="hero">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="deg-tag">000°</span><span>Punto de partida</span></div>
-        <h1>CIUDAD 360°</h1>
-        <p class="hero-tagline">Sumate y juntos construyamos la ciudad que queremos.</p>
-        <p class="hero-lead">Una ciudad se construye escuchando a quienes la viven todos los días.</p>
-        <p class="body">Ciudad 360° es un espacio para escuchar, conectar y transformar ideas en acciones. Queremos conocer lo que pasa en cada barrio, acompañar a quienes hacen, emprenden, crean y trabajan por nuestra ciudad, y construir propuestas desde la realidad de cada día.</p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="#sumate">Sumate</a>
-          <a class="btn btn-ghost" href="#que-es">Conocé el proyecto</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="compass" aria-hidden="true">
-          <div class="ticks"></div>
-          <div class="needle"></div>
-          <div class="labels">
-            <span class="n">000°</span>
-            <span class="e">090°</span>
-            <span class="s">180°</span>
-            <span class="w">270°</span>
-          </div>
-          <div class="hub">
-            <strong>360°</strong>
-            <span>Toda la ciudad</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="video-band" id="ciudad-dron">
-    <div class="video-band-media">
-      <video autoplay muted loop playsinline poster="assets/img/ciudad-dron-poster.jpg">
+    <div class="hero-media" aria-hidden="true">
+      <video id="hero-video" autoplay muted loop playsinline preload="auto" poster="assets/img/ciudad-dron-poster.jpg">
+        <source src="assets/video/ciudad-dron-540.mp4" type="video/mp4" media="(max-width: 760px)">
         <source src="assets/video/ciudad-dron.mp4" type="video/mp4">
       </video>
     </div>
-    <div class="wrap video-band-copy">
-      <div class="eyebrow"><span class="deg-tag">020°</span><span>La ciudad desde arriba</span></div>
-      <h2>Una ciudad se ve distinto cuando la mirás por completo.</h2>
+    <div class="wrap hero-copy">
+      <div class="eyebrow"><span class="deg-tag">000°</span><span>Punto de partida</span></div>
+      <h1>CIUDAD 360°</h1>
+      <p class="hero-tagline">Sumate y juntos construyamos la ciudad que queremos.</p>
+      <p class="hero-lead">Una ciudad se construye escuchando a quienes la viven todos los días.</p>
+      <p class="body">Ciudad 360° es un espacio para escuchar, conectar y transformar ideas en acciones. Queremos conocer lo que pasa en cada barrio, acompañar a quienes hacen, emprenden, crean y trabajan por nuestra ciudad, y construir propuestas desde la realidad de cada día.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#sumate">Sumate</a>
+        <a class="btn btn-ghost-light" href="#que-es">Conocé el proyecto</a>
+      </div>
+    </div>
+    <button type="button" class="video-toggle" id="video-toggle" aria-pressed="false" aria-label="Pausar el video">
+      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/></svg>
+      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.1v13.8L19 12z"/></svg>
+    </button>
+  </section>
+
+  <section class="mirada" id="ciudad-dron">
+    <div class="wrap mirada-grid">
+      <div class="mirada-copy">
+        <div class="eyebrow"><span class="deg-tag">020°</span><span>La ciudad desde arriba</span></div>
+        <h2>Una ciudad se ve distinto cuando la mirás por completo.</h2>
+      </div>
+      <div class="compass" aria-hidden="true">
+        <div class="ticks"></div>
+        <div class="needle"></div>
+        <div class="labels">
+          <span class="n">000°</span>
+          <span class="e">090°</span>
+          <span class="s">180°</span>
+          <span class="w">270°</span>
+        </div>
+        <div class="hub">
+          <strong>360°</strong>
+          <span>Toda la ciudad</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -810,11 +856,11 @@
           <fieldset>
             <legend>Sobre vos</legend>
             <div class="field">
-              <label for="f-nombre">Nombre y apellido</label>
+              <label for="f-nombre">Nombre y apellido <span class="req" aria-hidden="true">*</span></label>
               <input id="f-nombre" name="nombre" type="text" autocomplete="name" required>
             </div>
             <div class="field">
-              <label for="f-celular">Celular / WhatsApp</label>
+              <label for="f-celular">Celular / WhatsApp <span class="req" aria-hidden="true">*</span></label>
               <input id="f-celular" name="celular" type="tel" autocomplete="tel" required>
             </div>
             <div class="field">
@@ -822,7 +868,7 @@
               <input id="f-email" name="email" type="email" autocomplete="email">
             </div>
             <div class="field">
-              <label for="f-barrio">Barrio</label>
+              <label for="f-barrio">Barrio <span class="req" aria-hidden="true">*</span></label>
               <input id="f-barrio" name="barrio" type="text" required>
             </div>
             <div class="field">
@@ -936,12 +982,12 @@
 </main>
 
 <dialog class="historia" id="historia" aria-labelledby="historia-titulo">
-  <button type="button" class="historia-close" id="historia-close" aria-label="Cerrar historia">✕</button>
+  <button type="button" class="historia-close" id="historia-close" aria-label="Cerrar historia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   <div class="historia-scroll">
     <div class="hg" id="hg">
       <div class="hg-track" id="hg-track"></div>
-      <button type="button" class="hg-nav hg-prev" id="hg-prev" aria-label="Foto anterior">‹</button>
-      <button type="button" class="hg-nav hg-next" id="hg-next" aria-label="Foto siguiente">›</button>
+      <button type="button" class="hg-nav hg-prev" id="hg-prev" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="hg-nav hg-next" id="hg-next" aria-label="Foto siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       <span class="hg-count" id="hg-count" aria-live="polite"></span>
     </div>
     <div class="historia-text" id="historia-text"></div>
@@ -979,7 +1025,7 @@ window.C360Tabs = (function(){
   document.querySelectorAll('.tab-panel').forEach(function(p){ panels[p.getAttribute('data-tab')] = p; });
   var links = document.querySelectorAll('#tabs a[data-tab]');
   var tabsList = document.getElementById('tabs');
-  var video = document.querySelector('.video-band video');
+  var video = document.getElementById('hero-video');
   var baseTitle = document.title;
   var current = null;
   var listeners = [];
@@ -1016,7 +1062,7 @@ window.C360Tabs = (function(){
     var label = document.querySelector('#tabs a[data-tab="' + tab + '"]');
     document.title = tab === 'inicio' ? baseTitle : label.textContent + ' · ' + baseTitle;
     if (video){
-      if (tab === 'inicio'){ var pr = video.play(); if (pr && pr.catch) pr.catch(function(){}); }
+      if (tab === 'inicio'){ if (!video.dataset.userPaused){ var pr = video.play(); if (pr && pr.catch) pr.catch(function(){}); } }
       else video.pause();
     }
     current = tab;
@@ -1061,6 +1107,34 @@ window.C360Tabs = (function(){
   };
 })();
 
+/* ---------- video del inicio: botón pausar/reproducir; con movimiento reducido arranca quieto ---------- */
+(function(){
+  var video = document.getElementById('hero-video');
+  var btn = document.getElementById('video-toggle');
+  if (!video || !btn) return;
+  function sync(){
+    var paused = !!video.dataset.userPaused;
+    btn.setAttribute('aria-pressed', String(paused));
+    btn.setAttribute('aria-label', paused ? 'Reproducir el video' : 'Pausar el video');
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    video.removeAttribute('autoplay');
+    video.dataset.userPaused = '1';
+    video.pause();
+  }
+  btn.addEventListener('click', function(){
+    if (video.dataset.userPaused){
+      delete video.dataset.userPaused;
+      var pr = video.play(); if (pr && pr.catch) pr.catch(function(){});
+    } else {
+      video.dataset.userPaused = '1';
+      video.pause();
+    }
+    sync();
+  });
+  sync();
+})();
+
 (function(){
   var root = document.documentElement;
   var toggle = document.getElementById('theme-toggle');
@@ -1096,6 +1170,7 @@ window.C360Tabs = (function(){
   form.addEventListener('submit', function(e){
     e.preventDefault();
     status.className = 'form-status';
+    form.querySelectorAll('[aria-invalid]').forEach(function(el){ el.removeAttribute('aria-invalid'); });
 
     var nombre = val('f-nombre');
     var celular = val('f-celular');
@@ -1103,7 +1178,13 @@ window.C360Tabs = (function(){
 
     if (!nombre || !celular || !barrio){
       status.textContent = 'Para enviar tu aporte completá al menos nombre, celular y barrio.';
-      status.className = 'form-status';
+      status.className = 'form-status err';
+      var falta = null;
+      [['f-nombre',nombre],['f-celular',celular],['f-barrio',barrio]].forEach(function(f){
+        var el = document.getElementById(f[0]);
+        if (f[1]) el.removeAttribute('aria-invalid'); else { el.setAttribute('aria-invalid','true'); falta = falta || el; }
+      });
+      if (falta) falta.focus();
       return;
     }
 
