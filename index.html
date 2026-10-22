@@ -270,18 +270,44 @@
   .compass .labels .s{bottom:-2px; left:50%; transform:translateX(-50%);}
   .compass .labels .w{left:-6px; top:50%; transform:translateY(-50%);}
 
+
+  /* ---------- portada: planeta flotando sobre el video ---------- */
+  .portada{position:fixed; inset:0; z-index:100; background:#0E0D07 center/cover no-repeat url("assets/img/ciudad-dron-poster.jpg"); display:flex; align-items:center; justify-content:center; overflow:hidden; transition:opacity .45s ease, visibility .45s;}
+  .portada::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(10,9,5,.25), rgba(10,9,5,.72)); z-index:1;}
+  .portada-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .portada.is-out{opacity:0; visibility:hidden; pointer-events:none;}
+  .portada-body{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; padding:16px;}
+  .portada .planeta{width:min(900px, 100vw, 78svh); cursor:pointer; -webkit-tap-highlight-color:transparent; border-radius:50%;}
+  .portada .planeta:focus-visible{outline:3px solid var(--yellow); outline-offset:6px;}
+  .portada .pl-orbits ellipse, .portada .pl-orbits path{stroke:rgba(255,255,255,.7);}
+  .portada .pl-stars circle{fill:#fff;}
+  .portada .pl-city .b{fill:#1A1A15; stroke:rgba(255,235,5,.85); stroke-width:1;}
+  .portada .pl-city .t{stroke:rgba(255,255,255,.5); stroke-width:1;}
+  .portada .pl-ground .r{stroke:rgba(26,26,21,.25);}
+  .portada-entrar{font-size:1.15rem; padding:14px 44px; animation:portada-pulse 2.4s ease-in-out infinite;}
+  @keyframes portada-pulse{50%{transform:scale(1.05);}}
+  @media (prefers-reduced-motion:reduce){ .portada-entrar{animation:none;} .portada{transition:none;} }
+  body.portada-open{overflow:hidden;}
+
+  /* ---------- Qué es: fondo de fotos de las recorridas ---------- */
+  #que-es{padding-top:0;}
+  .qe-hero{position:relative; isolation:isolate; overflow:hidden; padding:clamp(48px,9vw,96px) 0; margin-bottom:36px; background:#0E0D07; color:#F7F3E3;}
+  .qe-mosaic{position:absolute; inset:0; z-index:-1; display:grid; grid-template-columns:repeat(4,1fr);}
+  .qe-mosaic img{width:100%; height:100%; object-fit:cover;}
+  .qe-mosaic::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(10,9,5,.88) 0%, rgba(10,9,5,.72) 60%, rgba(10,9,5,.5) 100%);}
+  @media (max-width:760px){ .qe-mosaic{grid-template-columns:repeat(2,1fr);} .qe-mosaic img:nth-child(n+3){display:none;} .qe-mosaic{grid-template-rows:1fr;} }
+  .qe-hero .section-head{max-width:720px;}
+  .qe-hero h2{color:#fff;}
+  .qe-hero .lede{color:#DCD6C2;}
+  .qe-hero .eyebrow{color:#E6DFC2;}
+
   /* ---------- section heads ---------- */
   .section-head{max-width:640px; margin-bottom:46px;}
   .section-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem); margin-bottom:14px;}
 
   /* ---------- audience grid (que es) ---------- */
   /* ---------- planeta Ciudad 360° (qué es) ---------- */
-  .que-es-top{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:32px; align-items:center; margin-bottom:36px;}
   .que-es-top .section-head{margin-bottom:0;}
-  @media (max-width:860px){
-    .que-es-top{grid-template-columns:1fr; gap:8px;}
-    .que-es-top .planeta{order:-1;}
-  }
   .planeta{position:relative; width:min(520px, 100%); aspect-ratio:1; margin:0 auto; user-select:none;}
   .planeta > svg, .pl-glow{position:absolute; inset:0; width:100%; height:100%;}
   .pl-back{z-index:0;} .pl-glow{z-index:1;} .pl-world{z-index:2; overflow:visible;} .pl-front{z-index:3;}
@@ -643,6 +669,46 @@
 </head>
 <body>
 
+<div class="portada" id="portada" role="dialog" aria-label="Bienvenida a Ciudad 360°">
+  <video class="portada-video" id="portada-video" autoplay muted loop playsinline preload="auto" poster="assets/img/ciudad-dron-poster.jpg" aria-hidden="true">
+    <source src="assets/video/ciudad-dron-540.mp4" type="video/mp4" media="(max-width: 760px)">
+    <source src="assets/video/ciudad-dron.mp4" type="video/mp4">
+  </video>
+  <div class="portada-body">
+      <div class="planeta" id="planeta" role="button" tabindex="0" aria-label="Entrar a Ciudad 360°" data-desc="Ciudad 360° como un planeta amarillo con una ciudad encima, y sus ejes girando alrededor: Barrios y vecinalismo, Emprendedurismo y empresas, Deporte, Cultura, Juventud, Instituciones y organizaciones, Espacio público y ciudad, Innovación y nuevas ideas.">
+        <svg class="pl-orbits pl-back" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
+        <div class="pl-glow" aria-hidden="true"></div>
+        <svg class="pl-world" viewBox="-250 -250 500 500" aria-hidden="true">
+          <defs>
+            <radialGradient id="pl-sphere" cx="38%" cy="32%" r="75%">
+              <stop offset="0" stop-color="#FFF6A0"/>
+              <stop offset=".45" stop-color="#FFEB05"/>
+              <stop offset="1" stop-color="#D9B800"/>
+            </radialGradient>
+          </defs>
+          <g class="pl-stars"></g>
+          <g class="pl-spin"><g class="pl-city"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
+          <circle r="112" fill="url(#pl-sphere)"/>
+          <g class="pl-spin"><g class="pl-ground"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
+          <text class="pl-name" y="-4" text-anchor="middle">CIUDAD</text>
+          <text class="pl-deg" y="34" text-anchor="middle">360°</text>
+        </svg>
+        <svg class="pl-orbits pl-front" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
+        <ul class="pl-ejes" aria-hidden="true">
+          <li>Barrios y vecinalismo</li>
+          <li>Emprendedurismo y empresas</li>
+          <li>Deporte</li>
+          <li>Cultura</li>
+          <li>Juventud</li>
+          <li>Instituciones y organizaciones</li>
+          <li>Espacio público y ciudad</li>
+          <li>Innovación y nuevas ideas</li>
+        </ul>
+      </div>
+    <button type="button" class="btn btn-primary portada-entrar" id="portada-entrar">Entrar</button>
+  </div>
+</div>
+
 <nav class="nav" aria-label="Secciones">
   <div class="nav-inner">
     <a class="logo-mark" href="#inicio">CIUDAD <span class="deg">360°</span></a>
@@ -722,44 +788,24 @@
 
   <div class="tab-panel" id="tab-que-es" data-tab="que-es">
   <section id="que-es">
-    <div class="wrap">
+    <div class="qe-hero">
+      <div class="qe-mosaic" aria-hidden="true">
+        <img src="assets/img/recorridas/02-1-sm.webp" alt="" loading="lazy">
+        <img src="assets/img/recorridas/10-1-sm.webp" alt="" loading="lazy">
+        <img src="assets/img/recorridas/12-1-sm.webp" alt="" loading="lazy">
+        <img src="assets/img/recorridas/12-2-sm.webp" alt="" loading="lazy">
+      </div>
+      <div class="wrap">
       <div class="que-es-top">
       <div class="section-head">
         <div class="eyebrow"><span class="deg-tag">045°</span><span>¿Qué es Ciudad 360°?</span></div>
         <h2>Una mirada completa sobre nuestra ciudad.</h2>
         <p class="lede">Creemos que para transformar una ciudad hay que mirarla desde todos sus ángulos. Por eso queremos escuchar a:</p>
       </div>
-      <div class="planeta" id="planeta" role="img" aria-label="Ciudad 360° como un planeta amarillo con una ciudad encima, y sus ejes girando alrededor: Barrios y vecinalismo, Emprendedurismo y empresas, Deporte, Cultura, Juventud, Instituciones y organizaciones, Espacio público y ciudad, Innovación y nuevas ideas.">
-        <svg class="pl-orbits pl-back" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
-        <div class="pl-glow" aria-hidden="true"></div>
-        <svg class="pl-world" viewBox="-250 -250 500 500" aria-hidden="true">
-          <defs>
-            <radialGradient id="pl-sphere" cx="38%" cy="32%" r="75%">
-              <stop offset="0" stop-color="#FFF6A0"/>
-              <stop offset=".45" stop-color="#FFEB05"/>
-              <stop offset="1" stop-color="#D9B800"/>
-            </radialGradient>
-          </defs>
-          <g class="pl-stars"></g>
-          <g class="pl-spin"><g class="pl-city"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
-          <circle r="112" fill="url(#pl-sphere)"/>
-          <g class="pl-spin"><g class="pl-ground"></g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="90s" repeatCount="indefinite"/></g>
-          <text class="pl-name" y="-4" text-anchor="middle">CIUDAD</text>
-          <text class="pl-deg" y="34" text-anchor="middle">360°</text>
-        </svg>
-        <svg class="pl-orbits pl-front" viewBox="-250 -250 500 500" aria-hidden="true"></svg>
-        <ul class="pl-ejes" aria-hidden="true">
-          <li>Barrios y vecinalismo</li>
-          <li>Emprendedurismo y empresas</li>
-          <li>Deporte</li>
-          <li>Cultura</li>
-          <li>Juventud</li>
-          <li>Instituciones y organizaciones</li>
-          <li>Espacio público y ciudad</li>
-          <li>Innovación y nuevas ideas</li>
-        </ul>
       </div>
       </div>
+    </div>
+    <div class="wrap">
       <div class="audience-grid">
         <article class="audience-card">
           <h3>Vecinos</h3>
@@ -1826,6 +1872,37 @@ window.C360Tabs = (function(){
   if ('IntersectionObserver' in window){
     new IntersectionObserver(function(es){ visible = es[0].isIntersecting; update(); }).observe(box);
   } else { visible = true; update(); }
+})();
+
+/* ---------- portada: el planeta primero; clic en el mundo o en Entrar abre la página ---------- */
+(function(){
+  var portada = document.getElementById('portada');
+  if (!portada) return;
+  var pv = document.getElementById('portada-video');
+  var hv = document.getElementById('hero-video');
+  var planeta = document.getElementById('planeta');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function close(){
+    portada.classList.add('is-out');
+    document.body.classList.remove('portada-open');
+    portada.setAttribute('aria-hidden', 'true');
+    if (pv) pv.pause();
+    if (location.hash !== '#inicio') location.hash = '#inicio';
+    window.scrollTo(0, 0);
+    if (hv && !hv.dataset.userPaused){ var pr = hv.play(); if (pr && pr.catch) pr.catch(function(){}); }
+  }
+  // con un link directo a una pestaña (#recorridas, #sumate/…) no se muestra la portada
+  if (location.hash && location.hash !== '#inicio' && location.hash !== '#'){
+    portada.classList.add('is-out'); portada.setAttribute('aria-hidden', 'true');
+    if (pv) pv.pause();
+    return;
+  }
+  document.body.classList.add('portada-open');
+  if (hv) hv.pause();
+  if (reduced && pv){ pv.removeAttribute('autoplay'); pv.pause(); }
+  planeta.addEventListener('click', close);
+  planeta.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); close(); } });
+  document.getElementById('portada-entrar').addEventListener('click', close);
 })();
 </script>
 </body>
