@@ -448,7 +448,7 @@
   .field input:focus, .field textarea:focus{outline:none; border-color:var(--yellow);}
   .field textarea{resize:vertical;}
   .field .req{color:var(--ink-soft);}
-  .field input[aria-invalid="true"]{border-color:var(--err);}
+  .field input[aria-invalid="true"], .field textarea[aria-invalid="true"]{border-color:var(--err);}
   .form-status.err{color:var(--err);}
 
   .pill-group{display:flex; flex-wrap:wrap; gap:9px;}
@@ -955,7 +955,46 @@
       <div class="eyebrow" style="justify-content:center; display:flex;"><span class="deg-tag">180°</span><span>Banco de ideas</span></div>
       <h2>Las mejores ideas también están en la ciudad.</h2>
       <p class="lede">Queremos construir un espacio donde las personas puedan compartir problemas, propuestas y posibles soluciones. Cada aporte puede convertirse en una nueva conversación, una visita, un proyecto o una propuesta.</p>
-      <a class="btn btn-primary" href="#sumate">Quiero dejar mi idea</a>
+      <a class="btn btn-primary" href="#dejar-idea">Quiero dejar mi idea</a>
+    </div>
+  </section>
+
+  <section id="dejar-idea">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto; margin-right:auto; text-align:center;">
+        <h2>Dejá tu idea</h2>
+        <p class="lede" style="margin:0 auto;">Contanos qué propondrías para tu barrio o para la ciudad. Solo te pedimos tu nombre y tu barrio.</p>
+      </div>
+      <div class="form-shell">
+        <form id="idea-form" novalidate>
+          <div class="field">
+            <label for="i-nombre">Nombre <span class="req" aria-hidden="true">*</span></label>
+            <input id="i-nombre" name="nombre" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="i-barrio">Barrio <span class="req" aria-hidden="true">*</span></label>
+            <input id="i-barrio" name="barrio" type="text" required>
+          </div>
+          <div class="field">
+            <label for="i-propuesta">Tu propuesta <span class="req" aria-hidden="true">*</span></label>
+            <textarea id="i-propuesta" name="propuesta" rows="5" required></textarea>
+          </div>
+          <div class="hp" aria-hidden="true">
+            <label for="i-sitio">No completar</label>
+            <input id="i-sitio" name="sitio_web" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg">Enviar mi idea</button>
+          <p id="idea-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div id="idea-done" class="form-step form-done" hidden tabindex="-1" aria-labelledby="idea-done-title">
+          <span class="done-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <h3 id="idea-done-title">¡Gracias! Tu idea ya está guardada.</h3>
+          <p class="done-text">La sumamos al Banco de ideas de Ciudad 360°.</p>
+          <p class="done-code">Código de tu idea: <strong id="idea-code"></strong></p>
+          <button type="button" class="btn btn-primary" id="idea-again">Dejar otra idea</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1180,7 +1219,7 @@
 window.C360Tabs = (function(){
   var TABS = ['inicio','que-es','que-hacer','ciudad-360','recorridas','banco-ideas','sumate','participa'];
   // anclas viejas del sitio de scroll -> pestaña que las contiene
-  var ALIAS = {top:'inicio', hero:'inicio', 'ciudad-dron':'inicio', 'conoce-realidad':'banco-ideas', seguinos:'participa', cierre:'participa'};
+  var ALIAS = {top:'inicio', hero:'inicio', 'ciudad-dron':'inicio', 'conoce-realidad':'banco-ideas', 'dejar-idea':'banco-ideas', seguinos:'participa', cierre:'participa'};
   var panels = {};
   document.querySelectorAll('.tab-panel').forEach(function(p){ panels[p.getAttribute('data-tab')] = p; });
   var links = document.querySelectorAll('#tabs a[data-tab]');
@@ -1912,6 +1951,72 @@ window.C360Tabs = (function(){
   var m = document.querySelector('.qe-mosaic');
   if (!m || !('IntersectionObserver' in window)) return;
   new IntersectionObserver(function(e){ m.classList.toggle('quieta', !e[0].isIntersecting); }).observe(m);
+})();
+</script>
+<script>
+/* ---------- Banco de ideas: nombre, barrio y propuesta -> planilla «Ciudad 360 - Banco de ideas» vía n8n ---------- */
+(function(){
+  var ENDPOINT = 'https://n8n.consultorarz.com/webhook/ciudad360-idea';
+  var form = document.getElementById('idea-form');
+  var status = document.getElementById('idea-status');
+  var done = document.getElementById('idea-done');
+  var btn = form.querySelector('button[type="submit"]');
+  function val(id){ return document.getElementById(id).value.trim(); }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (btn.disabled) return;
+    status.textContent = ''; status.className = 'form-status';
+    var campos = [['i-nombre', val('i-nombre')], ['i-barrio', val('i-barrio')], ['i-propuesta', val('i-propuesta')]];
+    var falta = null;
+    campos.forEach(function(f){
+      var el = document.getElementById(f[0]);
+      if (f[1]) el.removeAttribute('aria-invalid'); else { el.setAttribute('aria-invalid','true'); falta = falta || el; }
+    });
+    if (falta){
+      status.textContent = 'Completá tu nombre, tu barrio y tu propuesta.';
+      status.className = 'form-status err';
+      falta.focus();
+      return;
+    }
+    var datos = { nombre: campos[0][1], barrio: campos[1][1], propuesta: campos[2][1], sitio_web: val('i-sitio') };
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 20000);
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=UTF-8'},
+      body: JSON.stringify(datos),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(j){ if (!r.ok || !j.ok) throw new Error(j.error || r.status); return j; });
+    }).then(function(j){
+      clearTimeout(timer);
+      btn.disabled = false; btn.textContent = 'Enviar mi idea';
+      document.getElementById('idea-done-title').textContent = '¡Gracias, ' + datos.nombre.split(' ')[0] + '! Tu idea ya está guardada.';
+      document.getElementById('idea-code').textContent = j.codigo || '—';
+      document.getElementById('idea-code').parentNode.hidden = !j.codigo;
+      form.hidden = true; done.hidden = false; done.focus();
+    }).catch(function(){
+      clearTimeout(timer);
+      btn.disabled = false; btn.textContent = 'Enviar mi idea';
+      status.className = 'form-status err';
+      status.innerHTML = '';
+      status.appendChild(document.createTextNode('No pudimos guardar tu idea. Revisá tu conexión y volvé a tocar «Enviar mi idea», o '));
+      var a = document.createElement('a');
+      a.href = 'https://wa.me/5493886825636?text=' + encodeURIComponent('Idea para Ciudad 360°\n\nNombre: ' + datos.nombre + '\nBarrio: ' + datos.barrio + '\nPropuesta: ' + datos.propuesta);
+      a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'mandala por WhatsApp';
+      status.appendChild(a); status.appendChild(document.createTextNode('.'));
+    });
+  });
+
+  // otra idea: se mantienen nombre y barrio
+  document.getElementById('idea-again').addEventListener('click', function(){
+    document.getElementById('i-propuesta').value = '';
+    status.textContent = ''; status.className = 'form-status';
+    done.hidden = true; form.hidden = false;
+    document.getElementById('i-propuesta').focus();
+  });
 })();
 </script>
 </body>
